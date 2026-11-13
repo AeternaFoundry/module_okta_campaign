@@ -188,5 +188,101 @@ EOT
       type       = string
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.campaign_type == null || (contains(["RESOURCE", "USER"], v.campaign_type))
+      )
+    ])
+    error_message = "must be one of: \"RESOURCE\", \"USER\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.resource_settings == null || alltrue([for item in v.resource_settings : (contains(["APPLICATION", "APPLICATION_AND_GROUP", "GROUP"], item.type))])
+      )
+    ])
+    error_message = "must be one of: \"APPLICATION\", \"APPLICATION_AND_GROUP\", \"GROUP\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.resource_settings == null || alltrue([for item in v.resource_settings : (item.excluded_resources == null || alltrue([for item in item.excluded_resources : (item.resource_type == null || (contains(["APPLICATION", "GROUP"], item.resource_type)))]))])
+      )
+    ])
+    error_message = "must be one of: \"APPLICATION\", \"GROUP\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.resource_settings == null || alltrue([for item in v.resource_settings : (item.target_resources == null || alltrue([for item in item.target_resources : (contains(["APPLICATION", "GROUP"], item.resource_type))]))])
+      )
+    ])
+    error_message = "must be one of: \"APPLICATION\", \"GROUP\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.reviewer_settings == null || alltrue([for item in v.reviewer_settings : (contains(["GROUP", "MULTI_LEVEL", "RESOURCE_OWNER", "REVIEWER_EXPRESSION", "USER"], item.type))])
+      )
+    ])
+    error_message = "must be one of: \"GROUP\", \"MULTI_LEVEL\", \"RESOURCE_OWNER\", \"REVIEWER_EXPRESSION\", \"USER\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.reviewer_settings == null || alltrue([for item in v.reviewer_settings : (item.reviewer_levels == null || (length(item.reviewer_levels) <= 2))])
+      )
+    ])
+    error_message = "must have at most 2 elements"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.reviewer_settings == null || alltrue([for item in v.reviewer_settings : (item.reviewer_levels == null || alltrue([for item in item.reviewer_levels : (contains(["GROUP", "RESOURCE_OWNER", "REVIEWER_EXPRESSION", "USER"], item.type))]))])
+      )
+    ])
+    error_message = "must be one of: \"GROUP\", \"RESOURCE_OWNER\", \"REVIEWER_EXPRESSION\", \"USER\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.reviewer_settings == null || alltrue([for item in v.reviewer_settings : (item.reviewer_levels == null || alltrue([for item in item.reviewer_levels : (item.start_review == null || (length(item.start_review) <= 2))]))])
+      )
+    ])
+    error_message = "must have at most 2 elements"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.schedule_settings == null || alltrue([for item in v.schedule_settings : (contains(["ONE_OFF", "RECURRING"], item.type))])
+      )
+    ])
+    error_message = "must be one of: \"ONE_OFF\", \"RECURRING\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.schedule_settings == null || alltrue([for item in v.schedule_settings : (item.recurrence == null || alltrue([for item in item.recurrence : (item.repeat_on_type == null || (contains(["LAST_WEEKDAY_AS_START_DATE", "SAME_DAY_AS_START_DATE", "SAME_WEEKDAY_AS_START_DATE"], item.repeat_on_type)))]))])
+      )
+    ])
+    error_message = "must be one of: \"LAST_WEEKDAY_AS_START_DATE\", \"SAME_DAY_AS_START_DATE\", \"SAME_WEEKDAY_AS_START_DATE\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.principal_scope_settings == null || alltrue([for item in v.principal_scope_settings : (item.predefined_inactive_users_scope == null || alltrue([for item in item.predefined_inactive_users_scope : (item.inactive_days == null || (item.inactive_days >= 30))]))])
+      )
+    ])
+    error_message = "must be at least 30"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.campaigns : (
+        v.principal_scope_settings == null || alltrue([for item in v.principal_scope_settings : (item.predefined_inactive_users_scope == null || alltrue([for item in item.predefined_inactive_users_scope : (item.inactive_days == null || (item.inactive_days <= 365))]))])
+      )
+    ])
+    error_message = "must be at most 365"
+  }
 }
 
